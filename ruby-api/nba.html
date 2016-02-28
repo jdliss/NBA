@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html xmlns:ng="http://angularjs.org" lang="en" ng-app="stats">
+
+  <head>
+    <link href="http://fonts.googleapis.com/css?family=Oswald:400,700%7COpen+Sans+Condensed:300,700%7COpen+Sans" rel="stylesheet" type="text/css">
+
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="The destination for current and historic NBA statistics.">
+
+    <link rel="shortcut icon" href="/favicon.ico">
+    <title>NBA.com/Stats</title>
+
+    
+    <link rel="stylesheet" type="text/css" href="/styles/vendor.min.css">
+    <link rel="stylesheet" type="text/css" href="/styles/custom.min.css">
+
+  </head>
+
+  <body>
+
+    <div id="app-container">
+      <div class="container" id="main-container">
+
+        <div class="row">
+          <div class="col-sm-12">
+            <div>
+  <!--Top 728x90 Ad Space-->
+  <div id="header-ad">
+    <div id="ad_bnr_atf_01"></div>
+  </div>
+  <!--End Top 728x90 Ad Space-->
+
+  <div class="site-nav">
+    <div id="nbaHeader" data-ng-hide="IS_MOBILE" class="visible-lg"></div>
+
+    <a href="http://www.nba.com">
+      <img class="nba-logo" src="/media/img/NBA_logo.svg" type="image/svg+xml">
+    </a>
+
+    <a href="/">
+      <span class="title"><span>NBA.com/Stats</span></span>
+    </a>
+
+    <a href="" class="mobile-nav-toggle hidden-lg" ng-click="showMainMenu=!showMainMenu"><i class="fa fa-bars"></i></a>
+
+    <ul class="[ nav-buttons nav-buttons--extended ]  visible-lg">
+
+      <li class="searchbar" ng-controller="NavSearchController" ng-class="{'searchbar--toggled': showSearch}" ng-mouseenter="toggleSearch(true)" ng-mouseleave="toggleSearch(false)" ng-cloak>
+        <a class="searchbar__search-toggle" href="">
+          <i class="fa fa-search"></i>
+        </a>
+        <div ng-show="showSearch" class="searchbar__formarea">
+          <input type="text" class="searchbar__input" placeholder="Find a Player or Team" ng-model="search">
+          <div ng-show="showResults" class="searchbar__results">
+            <div class="searchbar__results__none" ng-show="!hasResults">
+              <h3>No Teams Or Players Found</h3>
+            </div>
+            <div class="searchbar__results__teams" ng-show="searchTeams.length">
+              <div class="searchbar__results__section">Teams</div>
+              <div ng-repeat="team in searchTeams">
+                <a class="searchbar__results__link" href="/team/#!/%7B%7B%20team.id%20%7D%7D/stats/">
+                  <span class="searchbar__results__link__text">{{ team.city }} {{ team.name }}</span>
+                </a>
+              </div>
+            </div>
+            <div class="searchbar__results__players" ng-show="searchPlayers.length">
+              <div class="searchbar__results__section">Players</div>
+              <div ng-repeat="(i, player) in searchPlayers | orderBy:'ROSTERSTATUS' | limitTo:maxPlayerResults">
+                <a class="searchbar__results__link" href="/player/#!/%7B%7B%20player.PERSON_ID%20%7D%7D/stats/">
+                  <span class="searchbar__results__link__text">{{ player.DISPLAY_LAST_COMMA_FIRST }}</span>
+                </a>
+              </div>
+              <div>
+                <a class="searchbar__results__link searchbar__results__link--more" ng-show="searchPlayers.length &gt; maxPlayerResults" ng-href="/players/#!/?player={{ search }}&amp;historic=1">See All Results</a>
+              </div>
+            </div>
+            <div class="searchbar__results__roster" ng-show="searchRoster.length">
+              <div class="searchbar__results__section">{{ searchTeams[0].abbr }} Roster</div>
+              <div ng-repeat="player in searchRoster">
+                <a class="searchbar__results__link" href="/player/#!/%7B%7B%20player.PERSON_ID%20%7D%7D/stats/">
+                  <span class="searchbar__results__link__text">{{ player.DISPLAY_LAST_COMMA_FIRST }}</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div> <!-- .searchbar__formarea -->
+      </li>
+
+      <li class="button">
+        <a href=""><span>Help</span> <i class="fa fa-caret-down"></i></a>
+        <div class="drop">
+          <a href="/help/"><span>Contact Us</span></a>
+          <a href="/help/glossary"><span>Glossary</span></a>
+          <a href="/help/faq/"><span>FAQ</span></a>
+          <a href="/thelab/statsqa/"><span>Stats Q&amp;A</span></a>
+          <a href="/help/statminimums/"><span>Statistical Minimums</span></a>
+          <a href="/help/whatsnew/"><span>What’s New</span></a>
+          <a href="/help/videostatus/"><span>Video &amp; Tracking Status</span></a>
+        </div>
+      </li>
+
+      <li class="button">
+        <a href=""><span>Other Stats</span> <i class="fa fa-caret-down"></i></a>
+        <div class="drop">
+          <a href="/playoffpicture/"><span>Playoff Picture</span></a>
+          <a href="/history/"><span>Franchise History</span></a>
+          <a href="/draftcombine/"><span>Draft Combine</span></a>
+          <a href="/drafthistory/"><span>Draft History</span></a>
+          <a href="/transactions/"><span>Transactions</span></a>
+          <a href="/awards/"><span>Awards</span></a>
+          <a href="/featuredarchive/"><span>Articles</span></a>
+        </div>
+      </li>
+
+      <li class="button">
+        <a href=""><span>Comparisons</span> <i class="fa fa-caret-down"></i></a>
+        <div class="drop">
+          <a href="/vs/"><span>On/Off Court</span></a>
+          <a href="/fantasycompare/"><span>Fantasy Compare</span></a>
+        </div>
+      </li>
+
+      <li class="button">
+        <a href=""><span>Play Type</span> <i class="fa fa-caret-down"></i></a>
+        <div class="drop">
+          <a href="/playtype/"><span>Summary</span></a>
+          <a href="/playtype/#!/transition/?dir=1"><span>Transition</span></a>
+          <a href="/playtype/#!/isolation/?dir=1"><span>Isolation</span></a>
+          <a href="/playtype/#!/ball-handler/?dir=1"><span>Pick &amp; Roll: Ball Handler</span></a>
+          <a href="/playtype/#!/roll-man/?dir=1"><span>Pick &amp; Roll: Roll Man</span></a>
+          <a href="/playtype/#!/post-up/?dir=1"><span>Post-Up</span></a>
+          <a href="/playtype/#!/spot-up/?dir=1"><span>Spot-Up</span></a>
+          <a href="/playtype/#!/hand-off/?dir=1"><span>Hand-Off</span></a>
+          <a href="/playtype/#!/cut/?dir=1"><span>Cut</span></a>
+          <a href="/playtype/#!/off-screen/?dir=1"><span>Off Screen</span></a>
+          <a href="/playtype/#!/putbacks/?dir=1"><span>Putbacks</span></a>
+          <a href="/playtype/#!/misc/?dir=1"><span>Miscellaneous</span></a>
+        </div>
+      </li>
+
+      <li class="button">
+        <a href=""><span>Player Tracking</span> <i class="fa fa-caret-down"></i></a>
+        <div class="drop">
+          <a href="/tracking/#!/player/catchshoot/"><span>Catch and Shoot</span></a>
+          <a href="/tracking/#!/player/defense/"><span>Defensive Impact</span></a>
+          <a href="/tracking/#!/player/drives/"><span>Drives</span></a>
+          <a href="/tracking/#!/player/passing/"><span>Passing</span></a>
+          <a href="/tracking/#!/player/possessions/"><span>Touches/Possession</span></a>
+          <a href="/tracking/#!/player/pullup/"><span>Pull Up Shooting</span></a>
+          <a href="/tracking/#!/player/offensive-rebounding/"><span>Offensive Rebounding</span></a>
+          <a href="/tracking/#!/player/defensive-rebounding/"><span>Defensive Rebounding</span></a>
+          <a href="/tracking/#!/player/rebounding/"><span>Total Rebounding</span></a>
+          <a href="/tracking/#!/player/shooting/"><span>Shooting Efficiency</span></a>
+          <a href="/tracking/#!/player/speed/"><span>Speed and Distance</span></a>
+          <a href="/tracking/#!/player/elbow/"><span>Elbow Touch</span></a>
+          <a href="/tracking/#!/player/post/"><span>Post Touch</span></a>
+          <a href="/tracking/#!/player/paint/"><span>Paint Touch</span></a>
+        </div>
+      </li>
+
+      <li class="button">
+        <a href=""><span>Team Stats</span> <i class="fa fa-caret-down"></i></a>
+        <div class="drop">
+          <a href="/teams/"><span>Team Index</span></a>
+          <a href="/league/team/"><span>Sortable Team Stats</span></a>
+          <a href="/league/lineups/"><span>Team Lineups</span></a>
+          <a href="/league/team/shots/"><span>Team Tracking Shots</span></a>
+          <a href="/league/team/defense/"><span>Team Tracking Defense</span></a>
+          <a href="/standings/"><span>Team Standings</span></a>
+          <a href="/league/team/#!/gamelogs"><span>Team Game Logs</span></a>
+        </div>
+      </li>
+
+      <li class="button">
+        <a href=""><span>Player Stats</span> <i class="fa fa-caret-down"></i></a>
+        <div class="drop">
+          <a href="/players/"><span>Player Index</span></a>
+          <a href="/league/player/"><span>Sortable Player Stats</span></a>
+          <a href="/league/player/shots/"><span>Player Tracking Shots</span></a>
+          <a href="/league/player/defense/"><span>Player Tracking Defense</span></a>
+          <a href="/league/player/#!/gamelogs"><span>Player Game Logs</span></a>
+        </div>
+      </li>
+
+      <li class="button">
+        <a href=""><span>League Leaders</span> <i class="fa fa-caret-down"></i></a>
+        <div class="drop">
+          <a href="/leaders/"><span>Official League Leaders</span></a>
+          <a href="/leaders/alltime/"><span>All-Time Leaders</span></a>
+          <a href="/league/player/#!/?sort=PTS"><span>Custom League Leaders</span></a>
+          <a href="/league/player/#!/clutch/?sort=PTS"><span>Clutch Leaders</span></a>
+          <a href="/league/player/#!/?PlayerExperience=Rookie&amp;sort=PTS"><span>Rookie Leaders</span></a>
+          <a href="/league/team/#!/advanced/?sort=NET_RATING"><span>Team Efficiency Leaders</span></a>
+        </div>
+      </li>
+
+      <li class="button">
+         <a href=""><span>All-Star</span> <i class="fa fa-caret-down"></i></a>
+         <div class="drop">
+           <a href="/featured/allstar2016_friday.html"><span>All-Star 2016 - Friday</span></a>
+           <a href="/featured/allstar2016_saturday.html"><span>All-Star 2016 - Saturday</span></a>
+           <a href="/featured/allstar2016_sunday.html"><span>All-Star 2016 - Sunday</span></a>
+           <a href="/leaders/alltime/#!?SeasonType=All%20Star&amp;PerMode=Totals"><span>All-Time Leaders</span></a>
+           <a href="/league/player/#!/gamelogs/?Season=ALLTIME&amp;SeasonType=All%20Star"><span>Player Game Logs</span></a>
+           <a href="/league/team/#!/gamelogs/?Season=ALLTIME&amp;SeasonType=All%20Star"><span>Team Game Logs</span></a>
+           <a href="/league/player/#!/?Season=2014-15&amp;SeasonType=All%20Star"><span>Players By Year</span></a>
+         </div>
+       </li>
+
+      <li class="button">
+        <a href="/scores/" target="_self"><span>Scores</span></a>
+      </li>
+
+      <li class="button">
+          <a href="/"><span>Stats Home</span></a>
+      </li>
+    </ul>
+  </div>
+
+
+
+
+
+
+
+
+
+
+  <ul class="mobile-nav-buttons hidden-lg hidden-xl col-sm-12 col-xs-12 list-unstyled" ng-if="showMainMenu" ng-cloak>
+
+    <li class="col-xs-12 button mobile-nav__item"><a href="/">Stats Home</a></li>
+
+    <li class="col-xs-12 button mobile-nav__item mobile-searchbar" ng-controller="NavSearchController" ng-cloak>
+      <div class="mobile-searchbar__formarea">
+        <i class="fa fa-search"></i>
+        <i class="fa fa-times" ng-click="search=''"></i>
+        <input type="text" class="mobile-searchbar__input" placeholder="Find a Player or Team" ng-model="search">
+
+        <div ng-show="showResults" class="searchbar__results">
+          <div class="searchbar__results__none" ng-show="!hasResults">
+            <h3>No Teams Or Players Found</h3>
+          </div>
+          <div class="searchbar__results__teams" ng-show="searchTeams.length">
+            <div class="searchbar__results__section">Teams</div>
+            <div ng-repeat="team in searchTeams">
+              <a class="searchbar__results__link" href="/team/#!/%7B%7B%20team.id%20%7D%7D/stats/">
+                <span class="searchbar__results__link__text">{{ team.city }} {{ team.name }}</span>
+              </a>
+            </div>
+          </div>
+          <div class="searchbar__results__players" ng-show="searchPlayers.length">
+            <div class="searchbar__results__section">Players</div>
+            <div ng-repeat="(i, player) in searchPlayers | orderBy:'ROSTERSTATUS' | limitTo:maxPlayerResults">
+              <a class="searchbar__results__link" href="/player/#!/%7B%7B%20player.PERSON_ID%20%7D%7D/stats/">
+                <span class="searchbar__results__link__text">{{ player.DISPLAY_LAST_COMMA_FIRST }}</span>
+              </a>
+            </div>
+            <div>
+              <a class="searchbar__results__link searchbar__results__link--more" ng-show="searchPlayers.length &gt; maxPlayerResults" ng-href="/players/#!/?player={{ search }}&amp;historic=1">See All Results</a>
+            </div>
+          </div>
+          <div class="searchbar__results__roster" ng-show="searchRoster.length">
+            <div class="searchbar__results__section">{{ searchTeams[0].abbr }} Roster</div>
+            <div ng-repeat="player in searchRoster">
+              <a class="searchbar__results__link" href="/player/#!/%7B%7B%20player.PERSON_ID%20%7D%7D/stats/">
+                <span class="searchbar__results__link__text">{{ player.DISPLAY_LAST_COMMA_FIRST }}</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div> <!-- .searchbar__formarea -->
+    </li>
+
+
+
+    <li class="col-xs-12 button mobile-nav__item"><a href="/scores/">Scores</a></li>
+
+    <li class="col-xs-12 button mobile-nav__item"><a href="" ng-click="showAllStar=!showAllStar">All-Star <i class="fa fa-caret-down" ng-hide="showAllStar"></i><i class="fa fa-caret-up" ng-show="showAllStar"></i></a></li>
+    <div class="mobile-nav__item-menu" ng-show="showAllStar">
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/featured/allstar2016_friday.html"><span>All-Star 2016 - Friday</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/featured/allstar2016_saturday.html"><span>All-Star 2016 - Saturday</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/featured/allstar2016_sunday.html"><span>All-Star 2016 - Sunday</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/leaders/alltime/#!?SeasonType=All%20Star&amp;PerMode=Totals"><span>All-Time Leaders</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/league/player/#!/gamelogs/?Season=ALLTIME&amp;SeasonType=All%20Star"><span>Player Game Logs</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/league/team/#!/gamelogs/?Season=ALLTIME&amp;SeasonType=All%20Star"><span>Team Game Logs</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/league/player/#!/?Season=2014-15&amp;SeasonType=All%20Star"><span>Players By Year</span></a></li>
+    </div>
+
+
+    <li class="col-xs-12 button mobile-nav__item"><a href="" ng-click="showLeagueLeaders = !showLeagueLeaders">League Leaders <i class="fa fa-caret-down" ng-hide="showLeagueLeaders"></i><i class="fa fa-caret-up" ng-show="showLeagueLeaders"></i></a></li>
+    <div class="mobile-nav__item-menu" ng-show="showLeagueLeaders">
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/leaders/"><span>Official League Leaders</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/leaders/alltime/"><span>All-Time Leaders</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/league/player/#!/?sort=PTS"><span>Custom League Leaders</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/league/player/#!/clutch/?sort=PTS"><span>Clutch Leaders</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/league/player/#!/?PlayerExperience=Rookie&amp;sort=PTS"><span>Rookie Leaders</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/league/team/#!/advanced/?sort=NET_RATING"><span>Team Efficiency Leaders</span></a></li>
+    </div>
+
+
+    <li class="col-xs-12 button mobile-nav__item"><a href="" ng-click="showPlayerStats = !showPlayerStats">Player Stats <i class="fa fa-caret-down" ng-hide="showPlayerStats"></i><i class="fa fa-caret-up" ng-show="showPlayerStats"></i></a></li>
+    <div class="mobile-nav__item-menu" ng-show="showPlayerStats">
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/players/"><span>Player Index</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/league/player/"><span>Sortable Player Stats</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/league/player/shots/"><span>Player Tracking Shots</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/league/player/defense/"><span>Player Tracking Defense</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/league/player/#!/gamelogs"><span>Player Game Logs</span></a></li>
+    </div>
+
+
+    <li class="col-xs-12 button mobile-nav__item"><a href="" ng-click="showTeamStats = !showTeamStats">Team Stats <i class="fa fa-caret-down" ng-hide="showTeamStats"></i><i class="fa fa-caret-up" ng-show="showTeamStats"></i></a></li>
+    <div class="mobile-nav__item-menu" ng-show="showTeamStats">
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/teams/"><span>Team Index</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/league/team/"><span>Sortable Team Stats</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/league/lineups/"><span>Team Lineups</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/league/team/shots/"><span>Team Tracking Shots</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/league/team/defense/"><span>Team Tracking Defense</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/standings/"><span>Team Standings</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/league/team/#!/gamelogs"><span>Team Game Logs</span></a></li>
+    </div>
+
+
+    <li class="col-xs-12 button mobile-nav__item"><a href="" ng-click="showPlayerTracking = !showPlayerTracking">Player Tracking <i class="fa fa-caret-down" ng-hide="showPlayerTracking"></i><i class="fa fa-caret-up" ng-show="showPlayerTracking"></i></a></li>
+    <div class="mobile-nav__item-menu" ng-show="showPlayerTracking">
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/tracking/#!/player/catchshoot/"><span>Catch and Shoot</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/tracking/#!/player/defense/"><span>Defensive Impact</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/tracking/#!/player/drives/"><span>Drives</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/tracking/#!/player/passing/"><span>Passing</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/tracking/#!/player/possessions/"><span>Touches/Possession</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/tracking/#!/player/pullup/"><span>Pull Up Shooting</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/tracking/#!/player/offensive-rebounding/"><span>Offensive Rebounding</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/tracking/#!/player/defensive-rebounding/"><span>Defensive Rebounding</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/tracking/#!/player/rebounding/"><span>Total Rebounding</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/tracking/#!/player/shooting/"><span>Shooting Efficiency</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/tracking/#!/player/speed/"><span>Speed and Distance</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/tracking/#!/player/elbow/"><span>Elbow Touch</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/tracking/#!/player/post/"><span>Post Touch</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/tracking/#!/player/paint/"><span>Paint Touch</span></a></li>
+    </div>
+
+
+    <li class="col-xs-12 button mobile-nav__item"><a href="" ng-click="showPlayType = !showPlayType">Play Type <i class="fa fa-caret-down" ng-hide="showPlayType"></i><i class="fa fa-caret-up" ng-show="showPlayType"></i></a></li>
+    <div class="mobile-nav__item-menu" ng-show="showPlayType">
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/playtype/"><span>Summary</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/playtype/#!/transition/?dir=1"><span>Transition</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/playtype/#!/isolation/?dir=1"><span>Isolation</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/playtype/#!/ball-handler/?dir=1"><span>Pick &amp; Roll: Ball Handler</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/playtype/#!/roll-man/?dir=1"><span>Pick &amp; Roll: Roll Man</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/playtype/#!/post-up/?dir=1"><span>Post-Up</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/playtype/#!/spot-up/?dir=1"><span>Spot-Up</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/playtype/#!/hand-off/?dir=1"><span>Hand-Off</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/playtype/#!/cut/?dir=1"><span>Cut</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/playtype/#!/off-screen/?dir=1"><span>Off Screen</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/playtype/#!/putbacks/?dir=1"><span>Putbacks</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/playtype/#!/misc/?dir=1"><span>Miscellaneous</span></a></li>
+    </div>
+
+
+    <li class="col-xs-12 button mobile-nav__item"><a href="" ng-click="showComparisons = !showComparisons">Comparisons <i class="fa fa-caret-down" ng-hide="showComparisons"></i><i class="fa fa-caret-up" ng-show="showComparisons"></i></a></li>
+    <div class="mobile-nav__item-menu" ng-show="showComparisons">
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/vs/"><span>On/Off Court</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/fantasycompare/"><span>Fantasy Compare</span></a></li>
+    </div>
+
+
+    <li class="col-xs-12 button mobile-nav__item"><a href="" ng-click="showOtherStats = !showOtherStats">Other Stats <i class="fa fa-caret-down" ng-hide="showOtherStats"></i><i class="fa fa-caret-up" ng-show="showOtherStats"></i></a></li>
+    <div class="mobile-nav__item-menu" ng-show="showOtherStats">
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/playoffpicture/"><span>Playoff Picture</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/history/"><span>Franchise History</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/draftcombine/"><span>Draft Combine</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/drafthistory/"><span>Draft History</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/transactions/"><span>Transactions</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/awards/"><span>Awards</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/featuredarchive/"><span>Articles</span></a></li>
+    </div>
+
+
+    <li class="col-xs-12 button mobile-nav__item"><a href="" ng-click="showHelp = !showHelp">Help <i class="fa fa-caret-down" ng-hide="showHelp"></i><i class="fa fa-caret-up" ng-show="showHelp"></i></a></li>
+    <div class="mobile-nav__item-menu" ng-show="showHelp">
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/help/"><span>Contact Us</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/help/glossary"><span>Glossary</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/help/faq/"><span>FAQ</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/thelab/statsqa/"><span>Stats Q&amp;A</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/help/statminimums/"><span>Statistical Minimums</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/help/whatsnew/"><span>What’s New</span></a></li>
+      <li class="col-xs-12 button mobile-nav__submenu-item"><a class="mobile-nav__submenu-link" href="/help/videostatus/"><span>Video &amp; Tracking Status</span></a></li>
+    </div>
+  </ul>
+</div>
+
+<div class="row esi china-promo-row">
+  
+ </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="stats-homepage" ng-cloak>
+
+  <div class="page-header">
+    <div class="content-left">
+      <span class="breadcrumb">   </span>
+      <h1>
+<span class="alpha">NBA.com/</span>Stats</h1>
+    </div>
+    <div data-ng-controller="HomepageBreakingNewsCtrl" data-ng-cloak>
+
+ <div data-ng-bind-html="breakingNews"></div>
+
+</div> <!-- .stats-news-list -->
+    <div class="content-right sap-header">
+  <img class="visible-lg visible-md sap" src="/media/img/header_SAP.svg">
+  <img class="visible-lg visible-md no-branding esi" src="/media/img/header_nobranding.svg">   
+  <img class="visible-sm visible-xs sap" src="/media/img/header_SAP_mobile.svg">
+  <img class="visible-sm visible-xs no-branding esi" src="/media/img/mobile_SAP_mainheader_nobranding.png">
+</div>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-12">
+      <div data-ng-controller="HomepageLeadersCtrl" class="homepage-leaders">
+
+    <div class="[ row ] stats-table-title">
+
+        <div class="[ col-sm-12 col-md-4 ] homepage-leaders__header">
+          <span>{{ statRangeLabel }} League Leaders</span>
+        </div>
+
+        <div class="[ col-sm-12 col-md-8 ]">
+          <div class="homepage-data-selector-group clearfix">
+
+              <div class="[ btn-group ] homepage-data-selector" dropdown>
+                <button class="[ btn ] stats-table-dropdown dropdown-toggle homepage-data-selector__label" type="button">
+                  <span class="homepage-data-selector__label__param">{{ params.StatType }}</span>
+                  <span class="[ fa fa-angle-down ]  dropdown-down-angle"></span>
+                </button>
+                <ul class="[ dropdown-menu ]" role="menu">
+                  <li><a href="" ng-click="setStatType('Traditional')">Traditional</a></li>
+                  <li><a href="" ng-click="setStatType('Advanced')">Advanced</a></li>
+                  <li><a href="" ng-click="setStatType('Tracking')">Tracking</a></li>
+                </ul>
+              </div> <!-- .homepage-data-selector -->
+
+<!--
+              <div class="[ btn-group ]  homepage-data-selector" dropdown>
+                <button type="button" class="[ btn ]  stats-table-dropdown dropdown-toggle homepage-data-selector__label">
+                  <span class="homepage-data-selector__label__param">{{ params.SeasonType }}</span>
+                  <span class="fa fa-angle-down dropdown-down-angle"></span>
+                </button>
+                <ul class="[ dropdown-menu ]" role="menu">
+                  <li><a href="" ng-click="setSeasonType('Pre Season')">Pre Season</a></li>
+                  <li><a href="" ng-click="setSeasonType('Regular Season')">Regular Season</a></li>
+                  <li><a href="" ng-click="setSeasonType('Playoffs')">Playoffs</a></li>
+                </ul>
+              </div>
+--> <!-- .homepage-data-selector -->
+
+              <div class="[ btn-group ]  homepage-data-selector" dropdown>
+                <button type="button" class="[ btn ]  stats-table-dropdown dropdown-toggle homepage-data-selector__label">
+                  <span class="homepage-data-selector__label__param">{{ params.GameScope }}</span>
+                  <span class="fa fa-angle-down dropdown-down-angle"></span>
+                </button>
+                <ul class="[ dropdown-menu ]" role="menu">
+                  <li><a href="" ng-click="setGameScope('Season')">Season</a></li>
+                  <li><a href="" ng-click="setGameScope('Yesterday')">Yesterday</a></li>
+                  <li><a href="" ng-click="setGameScope('Last 10')">Last 10</a></li>
+                  <!-- <li><a href="" ng-click="setGameScope('Finals')">Finals</a></li> -->
+                </ul>
+              </div> <!-- .homepage-data-selector -->
+
+              <div class="[ btn-group ]  homepage-data-selector" dropdown>
+                <button type="button" class="[ btn ]  stats-table-dropdown dropdown-toggle homepage-data-selector__label">
+                  <span class="homepage-data-selector__label__param">{{params.PlayerOrTeam}}</span>
+                  <span class="[ fa fa-angle-down ]  dropdown-down-angle"></span>
+                </button>
+                <ul class="[ dropdown-menu ]" role="menu">
+                  <li><a href="" ng-click="setPlayerOrTeam('Player')">Player</a></li>
+                  <li><a href="" ng-click="setPlayerOrTeam('Team')">Team</a></li>
+                </ul>
+              </div> <!-- .homepage-data-selector -->
+
+            </div> <!-- .homepage-data-selector-group -->
+        </div>
+    </div> <!-- .stats-table-title -->
+
+    <div stats-loader="isLoading"></div>
+
+    <div stats-no-data-msg="noData &amp;&amp; !isLoading"></div>
+
+    <div ng-hide="isLoading || noData">
+
+        <div class="[ visible-xs hidden-sm hidden-md hidden-lg ]">
+            <div ng-if="params.StatType === 'Traditional'">
+                <div class="row top">
+                    <stats-homepage-tile tile-index="0" current-index="currentIndex" dataset="datasets[0].datatable" template="homepage-tile-pts"></stats-homepage-tile>
+                    <stats-homepage-tile tile-index="1" current-index="currentIndex" dataset="datasets[1].datatable" template="homepage-tile-reb"></stats-homepage-tile>
+                    <stats-homepage-tile tile-index="2" current-index="currentIndex" dataset="datasets[2].datatable" template="homepage-tile-ast"></stats-homepage-tile>
+                    <stats-homepage-tile tile-index="3" current-index="currentIndex" dataset="datasets[3].datatable" template="homepage-tile-stl"></stats-homepage-tile>
+                </div>
+                <div class="row bottom">
+                    <stats-homepage-tile tile-index="4" current-index="currentIndex" dataset="datasets[4].datatable" template="homepage-tile-fg-pct"></stats-homepage-tile>
+                    <stats-homepage-tile tile-index="5" current-index="currentIndex" dataset="datasets[5].datatable" template="homepage-tile-ft-pct"></stats-homepage-tile>
+                    <stats-homepage-tile tile-index="6" current-index="currentIndex" dataset="datasets[6].datatable" template="homepage-tile-fg3-pct"></stats-homepage-tile>
+                    <stats-homepage-tile tile-index="7" current-index="currentIndex" dataset="datasets[7].datatable" template="homepage-tile-blk"></stats-homepage-tile>
+                </div>
+            </div>
+
+            <div ng-if="params.StatType === 'Advanced'">
+                <div class="row top">
+                    <stats-homepage-tile tile-index="0" current-index="currentIndex" dataset="datasets[0].datatable" template="homepage-tile-off-rating"></stats-homepage-tile>
+                    <stats-homepage-tile tile-index="1" current-index="currentIndex" dataset="datasets[1].datatable" template="homepage-tile-def-rating"></stats-homepage-tile>
+                    <stats-homepage-tile tile-index="2" current-index="currentIndex" dataset="datasets[2].datatable" template="homepage-tile-net-rating"></stats-homepage-tile>
+                    <stats-homepage-tile tile-index="3" current-index="currentIndex" dataset="datasets[3].datatable" template="homepage-tile-pie"></stats-homepage-tile>
+                </div>
+                <div class="row bottom">
+                    <stats-homepage-tile tile-index="4" current-index="currentIndex" dataset="datasets[4].datatable" template="homepage-tile-reb-pct"></stats-homepage-tile>
+                    <stats-homepage-tile tile-index="5" current-index="currentIndex" dataset="datasets[5].datatable" template="homepage-tile-ast-pct"></stats-homepage-tile>
+                    <stats-homepage-tile tile-index="6" current-index="currentIndex" dataset="datasets[6].datatable" template="homepage-tile-ts-pct"></stats-homepage-tile>
+                    <stats-homepage-tile tile-index="7" current-index="currentIndex" dataset="datasets[7].datatable" template="homepage-tile-efg-pct"></stats-homepage-tile>
+                </div>
+            </div>
+
+            <div ng-if="params.StatType === 'Tracking'">
+                <div class="row top">
+                    <stats-homepage-tile tile-index="0" current-index="currentIndex" dataset="datasets[0].datatable" template="homepage-tile-dist-miles"></stats-homepage-tile>
+                    <stats-homepage-tile tile-index="1" current-index="currentIndex" dataset="datasets[1].datatable" template="homepage-tile-ast-points-created"></stats-homepage-tile>
+                    <stats-homepage-tile tile-index="2" current-index="currentIndex" dataset="datasets[2].datatable" template="homepage-tile-drives"></stats-homepage-tile>
+                    <stats-homepage-tile tile-index="3" current-index="currentIndex" dataset="datasets[3].datatable" template="homepage-tile-touches"></stats-homepage-tile>
+
+                </div>
+                <div class="row bottom">
+                    <stats-homepage-tile tile-index="4" current-index="currentIndex" dataset="datasets[4].datatable" template="homepage-tile-post-touches"></stats-homepage-tile>
+                    <stats-homepage-tile tile-index="5" current-index="currentIndex" dataset="datasets[5].datatable" template="homepage-tile-contested-rebs"></stats-homepage-tile>
+                    <stats-homepage-tile tile-index="6" current-index="currentIndex" dataset="datasets[6].datatable" template="homepage-tile-catch-shoot-pts"></stats-homepage-tile>
+                    <stats-homepage-tile tile-index="7" current-index="currentIndex" dataset="datasets[7].datatable" template="homepage-tile-pull-up-pts"></stats-homepage-tile>
+                </div>
+            </div>
+        </div>
+
+        <div class="[ hidden-xs visible-sm visible-md visible-lg ]">
+            <div ng-if="params.StatType === 'Traditional'">
+                <div class="row top">
+                    <stats-homepage-tile tile-index="0" current-index="currentIndex" dataset="datasets[0].datatable" template="homepage-tile-pts"></stats-homepage-tile>
+                    <stats-homepage-tile tile-index="1" current-index="currentIndex" dataset="datasets[1].datatable" template="homepage-tile-reb"></stats-homepage-tile>
+                    <stats-homepage-tile tile-index="2" current-index="currentIndex" dataset="datasets[2].datatable" template="homepage-tile-ast"></stats-homepage-tile>
+                    <stats-homepage-tile tile-index="3" current-index="currentIndex" dataset="datasets[3].datatable" template="homepage-tile-stl"></stats-homepage-tile>
+                </div>
+                <div class="row bottom" ng-show="showMoreStats">
+                    <stats-homepage-tile tile-index="4" current-index="currentIndex" dataset="datasets[4].datatable" template="homepage-tile-fg-pct"></stats-homepage-tile>
+                    <stats-homepage-tile tile-index="5" current-index="currentIndex" dataset="datasets[5].datatable" template="homepage-tile-ft-pct"></stats-homepage-tile>
+                    <stats-homepage-tile tile-index="6" current-index="currentIndex" dataset="datasets[6].datatable" template="homepage-tile-fg3-pct"></stats-homepage-tile>
+                    <stats-homepage-tile tile-index="7" current-index="currentIndex" dataset="datasets[7].datatable" template="homepage-tile-blk"></stats-homepage-tile>
+                </div>
+            </div>
+
+            <div ng-if="params.StatType === 'Advanced'">
+                <div class="row top">
+                    <stats-homepage-tile tile-index="0" current-index="currentIndex" dataset="datasets[0].datatable" template="homepage-tile-off-rating"></stats-homepage-tile>
+                    <stats-homepage-tile tile-index="1" current-index="currentIndex" dataset="datasets[1].datatable" template="homepage-tile-def-rating"></stats-homepage-tile>
+                    <stats-homepage-tile tile-index="2" current-index="currentIndex" dataset="datasets[2].datatable" template="homepage-tile-net-rating"></stats-homepage-tile>
+                    <stats-homepage-tile tile-index="3" current-index="currentIndex" dataset="datasets[3].datatable" template="homepage-tile-pie"></stats-homepage-tile>
+                </div>
+                <div class="row bottom" ng-show="showMoreStats">
+                    <stats-homepage-tile tile-index="4" current-index="currentIndex" dataset="datasets[4].datatable" template="homepage-tile-reb-pct"></stats-homepage-tile>
+                    <stats-homepage-tile tile-index="5" current-index="currentIndex" dataset="datasets[5].datatable" template="homepage-tile-ast-pct"></stats-homepage-tile>
+                    <stats-homepage-tile tile-index="6" current-index="currentIndex" dataset="datasets[6].datatable" template="homepage-tile-ts-pct"></stats-homepage-tile>
+                    <stats-homepage-tile tile-index="7" current-index="currentIndex" dataset="datasets[7].datatable" template="homepage-tile-efg-pct"></stats-homepage-tile>
+                </div>
+            </div>
+
+            <div ng-if="params.StatType === 'Tracking'">
+                <div class="row top">
+                    <stats-homepage-tile tile-index="0" current-index="currentIndex" dataset="datasets[0].datatable" template="homepage-tile-dist-miles"></stats-homepage-tile>
+                    <stats-homepage-tile tile-index="1" current-index="currentIndex" dataset="datasets[1].datatable" template="homepage-tile-ast-points-created"></stats-homepage-tile>
+                    <stats-homepage-tile tile-index="2" current-index="currentIndex" dataset="datasets[2].datatable" template="homepage-tile-drives"></stats-homepage-tile>
+                    <stats-homepage-tile tile-index="3" current-index="currentIndex" dataset="datasets[3].datatable" template="homepage-tile-touches"></stats-homepage-tile>
+                </div>
+                <div class="row bottom" ng-show="showMoreStats">
+                    <stats-homepage-tile tile-index="4" current-index="currentIndex" dataset="datasets[4].datatable" template="homepage-tile-post-touches"></stats-homepage-tile>
+                    <stats-homepage-tile tile-index="5" current-index="currentIndex" dataset="datasets[5].datatable" template="homepage-tile-contested-rebs"></stats-homepage-tile>
+                    <stats-homepage-tile tile-index="6" current-index="currentIndex" dataset="datasets[6].datatable" template="homepage-tile-catch-shoot-pts"></stats-homepage-tile>
+                    <stats-homepage-tile tile-index="7" current-index="currentIndex" dataset="datasets[7].datatable" template="homepage-tile-pull-up-pts"></stats-homepage-tile>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="visible-xs indicators">
+            <div class="circle ng-scope" ng-class="{'active': currentIndex == 0 }"></div>
+            <div class="circle ng-scope" ng-class="{'active': currentIndex == 1 }"></div>
+            <div class="circle ng-scope" ng-class="{'active': currentIndex == 2 }"></div>
+            <div class="circle ng-scope" ng-class="{'active': currentIndex == 3 }"></div>
+            <div class="circle ng-scope" ng-class="{'active': currentIndex == 4 }"></div>
+            <div class="circle ng-scope" ng-class="{'active': currentIndex == 5 }"></div>
+            <div class="circle ng-scope" ng-class="{'active': currentIndex == 6 }"></div>
+            <div class="circle ng-scope" ng-class="{'active': currentIndex == 7 }"></div>
+        </div>
+
+        <div class="expand-leaderboard hidden-xs">
+            <a ng-click="showMoreStats = !showMoreStats">
+                <span ng-hide="showMoreStats"><span class="fa fa-angle-down"></span>More Stats</span>
+                <span ng-show="showMoreStats"><span class="fa fa-angle-up"></span>Less Stats</span>
+            </a>
+        </div>
+    </div>
+</div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-12">
+      <div data-ng-controller="PlayerListCtrl" class="stats-player-list" data-ng-cloak>
+    <div class="stat-table">
+        <div class="title">
+            <div class="row player-search-row">
+                <div class="col-xs-12 player-search-row__input-group">
+                    <div class="col-md-4">
+                        <input class="player-search-row__input" type="text" ng-model="search.player" placeholder="Find Player">
+                    </div>
+                    <div class="col-md-4">
+                        <input class="player-search-row__input" type="text" ng-model="search.team" placeholder="Find Team">
+                    </div>
+                    <div class="col-md-3 player-search-row__btn-column">
+                        <div class="btn-group player-search-row__btn-group switch-list">
+                            <a href="" class="btn player-search-row__btn" ng-click="onlyActive=true; listShown=true" ng-class="{active:onlyActive}">Active</a>
+                            <a href="" class="btn player-search-row__btn" ng-click="onlyActive=false; listShown=true" ng-class="{active:!onlyActive}">Historic</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="stats-table-config player-index__quick-jump">
+            <div class="col-sm-4 col-xs-12">
+                <div class="quick-jump">Use the quick jump links to find players by last name</div>
+            </div>
+            <div class="col-md-8 col-sm-8  letters" ng-show="lettersOrInput!=='full'"> <a ng-repeat="letter in alphabet" ng-class="{active:selectedLetter==letter}" ng-click="onlyInitial(letter); showList();">{{::letter}}</a>
+            </div>
+            <div ng-show="lettersOrInput==='full'">
+                <div class="col-md-3">
+                    <input type="text" ng-model="search" placeholder="Enter Name:">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div stats-loader="isLoading"></div>
+    <div ng-show="listShown">
+        <div class="row player-list-row" ng-repeat="letter in letters" ng-hide="shouldHideLetter(letter)" ng-class="{historic:!onlyActive}">
+            <div stats-player-list-row letter="letter"></div>
+        </div>
+        <div class="close-list">
+            <a href="" class="btn" ng-click="closeList()">Close List<i class="fa fa-times"></i></a>
+        </div>
+    </div>
+</div>
+    </div>
+  </div>
+
+  <div class="row">
+
+    <div class="col-sm-9">
+      <div data-ng-controller="HomepageBeyondTheNumbersCtrl" class="stats-news-list stats-beyond-the-numbers" data-ng-cloak>
+
+ <div class="stats-table-title">
+    Beyond The Numbers
+    <div class="sap-logo">
+        Insights from SAP
+     </div>
+  </div>
+
+
+      <div>
+          <div class="wrapper" ng-init="myInterval=5000">
+            <carousel interval="myInterval">
+
+              <slide ng-repeat="(i, slide) in slides" active="slide.active">
+                  <div class="row">
+                      <div class="col-sm-5">
+                        <div class="image">
+                            <a href="%7B%7Bslide.ListItemLink%7D%7D"><img ng-src="http://stats.nba.com{{slide.ListItemImageURL}}?downsize=370px:*"></a>
+                        </div>
+                      </div>
+                      <div class="col-sm-7">
+                        <div class="carousel-caption">
+                          <h4><a href="%7B%7Bslide.ListItemLink%7D%7D">{{slide.ListItemCaption}}</a></h4>
+                          <div class="content" ng-bind-html="trustAsHtml(slide.ListItemDescription)"></div>
+
+                        </div>
+                      </div>
+                  </div>
+                  <div class="counter">Story {{i+1}} of 5</div>
+              </slide>
+            </carousel>
+          </div>
+
+        </div>
+
+
+</div> <!-- .stats-news-list -->
+    </div>
+
+    <div class="col-sm-3">
+        <div data-ng-controller="HomepageHeadlinesCtrl" class="stats-headlines" data-ng-cloak>
+
+  <div class="stats-table-title">
+    Headlines
+  </div>
+
+  <div ng-repeat="(i, article) in data" class="item">
+    <a ng-href="{{article.ListItemLink}}" title="{{article.ListItemCaption}}">{{article.ListItemCaption}}</a>
+  </div>
+  <div class="twitter">
+    <a href="https://twitter.com/nbastats">Follow NBA.com/stats on Twitter<span class="fa fa-twitter"></span></a>
+  </div>
+
+
+</div> <!-- .stats-news-list -->
+    </div>
+
+  </div>
+
+  <div class="row">
+
+    <div class="col-md-6">
+      <div class="hp__assist-tracker" data-ng-controller="HomepageAssistTrackerCtrl" ng-cloak>
+
+  <div class="stats-table-title">
+    <span>State Farm<sup>®</sup><br class="hide-lg">Assist Tracker</span>
+    <div class="state-farm-logo">StateFarm</div>
+  </div> <!-- .stats-table-title -->
+
+  <div class="[ clearfix ] hp__assist-tracker__total-assists">
+    <div class="hp__assist-tracker__total-assists__hero">{{ totalAssists | number }}</div>
+    <div class="hp__assist-tracker__total-assists__copy">TOTAL ASSISTS THIS SEASON</div>
+  </div> <!-- .hp__assist-tracker__total-assists -->
+
+  <div class="hp__assist-tracker__promo">
+    <div class="hp__assist-tracker__promo__hero">#ExistToAssist</div>
+    <div class="hp__assist-tracker__promo__copy">
+      Not all assists exist on the court. Track your favorite
+      players assist and see how State Farm<sup>®</sup> and the NBA are
+      helping to bring assists to communities around the country.
+    </div>
+  </div>
+<!-- .hp__assist-tracker__promo -->
+
+
+
+  <div class="hp__assist-tracker__leader">
+
+    <div class="hp_assist-tracker__headshot">
+      <a ng-href="/player/#!/{{ assistLeader.ListItemLink }}/ }}">
+        <stats-img-player class="player-img" player-id="assistLeader.ListItemLink" size="large" type="avatar"></stats-img-player>
+      </a>
+    </div>
+    <!-- .hp_assist-tracker__headshot -->
+
+    <div class="hp_assist-tracker__leader-info">
+      <div class="hp_assist-tracker__leader-info__title">ASSIST LEADER</div>
+      <div class="hp_assist-tracker__leader-info__headline">{{ assistLeader.ListItemCaption }}</div>
+      <div class="hp_assist-tracker__leader-info__matchup">{{ assistLeader.ListItemAbstract }}</div>
+      <div class="hp_assist-tracker__leader-info__description" ng-bind-html="assistLeader.description"></div>
+    </div>
+    <!-- .hp_assist-tracker__leader-info -->
+  </div> <!-- .hp__assist-tracker__leader -->
+
+  <div class="hp_assist-tracker__more-link more-link">
+    <a href="http://www.nba.com/assisttracker/">More Assist News</a>
+  </div> <!-- .hp_assist-tracker__more-link -->
+
+
+</div> <!-- .stats-news-list -->
+    </div>
+
+    <div class="col-md-6">
+      <div data-ng-controller="HomepageFantasyNewsCtrl" class="stats-fantasy-news" data-ng-cloak>
+
+  <div class="stats-table-title">
+    Fantasy News <span class="sponsor"><a href="http://www.rotowire.com/">Provided by RotoWire</a></span>
+  </div>
+  <div class="items">
+      <div ng-repeat="(i, article) in data" class="item col-sm-12">
+      	  <div class="date-text">{{article.ListItemPubDate}}</div>
+          <h2><a href="/player/#!/%7B%7Barticle.PlayerID%7D%7D">{{article.ListItemCaption}}</a></h2>
+      </div>
+ </div>
+ <div class="more-link">
+    <a href="/fantasynews/">More Fantasy News</a>
+ </div>
+
+</div> <!-- .stats-news-list -->
+      <div data-ng-controller="HomepageGlossaryCtrl" class="stats-glossary" data-ng-cloak>
+
+ 
+  <div ng-repeat="(i, article) in data" class="item">
+      <h3>What is {{article.ListItemAbstract}}?</h3>
+      <div class="text">{{article.ListItemCaption}}</div>
+      <a href="/help/glossary/#!?definition=%7B%7Barticle.ListItemLink%7D%7D" class="learn-more">Learn More</a> 
+  </div>
+    
+  <a href="#" class="sap"><img src="/media/img/glossary_SAP.svg" alt="SAP"></a>    
+
+
+
+</div> <!-- .stats-news-list -->
+    </div>
+
+  </div>
+
+  <div class="row">
+
+    <div class="col-sm-12">
+      <div class="stats-homepage-synergy" data-ng-cloak>
+
+  <div class="stats-table-title">
+    PLAY TYPE STATS <span class="sponsor">provided by Synergy</span>
+  </div>
+
+  <div class="row">
+
+    <div class="col-sm-8">
+      <div class="inner clearfix" ng-controller="HomepageSynergyCtrl">
+        <img ng-src="http://stats.nba.com/{{ data.ListItemImageURL }}" class="article-image">
+        <h2 class="article-header">{{ data.ListItemCaption }}</h2>
+        <div class="article-content" ng-bind-html="trustAsHtml(data.ListItemDescription)"></div>
+      </div>
+    </div>
+
+    <div class="col-sm-4">
+      <ul class="synergy-play-types">
+        <li><a href="/playtype/"><span class="playtype">PLAY TYPE:</span>Summary<i class="fa fa-chevron-right"></i></a></li>
+        <li><a href="/playtype/#!/transition/?dir=1"><span class="playtype">PLAY TYPE:</span>Transition<i class="fa fa-chevron-right"></i></a></li>
+        <li><a href="/playtype/#!/isolation/?dir=1"><span class="playtype">PLAY TYPE:</span>Isolation<i class="fa fa-chevron-right"></i></a></li>
+        <li><a href="/playtype/#!/ball-handler/?dir=1"><span class="playtype">PLAY TYPE:</span>Pick &amp; Roll Handler<i class="fa fa-chevron-right"></i></a></li>
+        <li><a href="/playtype/#!/roll-man/?dir=1"><span class="playtype">PLAY TYPE:</span>Pick &amp; Roll Man<i class="fa fa-chevron-right"></i></a></li>
+        <li><a href="/playtype/#!/post-up/?dir=1"><span class="playtype">PLAY TYPE:</span>Post Up<i class="fa fa-chevron-right"></i></a></li>
+        <li><a href="/playtype/#!/hand-off/?dir=1"><span class="playtype">PLAY TYPE:</span>Hand Off<i class="fa fa-chevron-right"></i></a></li>
+      </ul>
+    </div>
+
+  </div>
+
+</div> <!-- .stats-homepage-synergy -->
+    </div>
+
+  </div>
+
+  <div class="row no-bottom-margin">
+
+    <div class="col-sm-6">
+      <div data-ng-controller="HomepageThisDayInHistoryCtrl" class="stats-this-day-in-history" data-ng-cloak>
+
+  <div class="stats-table-title">
+    This Day In History
+  </div>
+
+  <div ng-repeat="(i, article) in data" class="item">
+    <a href="%7B%7Barticle.ListItemLink%7D%7D">{{article.ListItemCaption}}</a> - <span>{{ article.ListItemDescription }}</span>
+  </div>
+
+</div> <!-- .stats-news-list -->
+    </div>
+
+    <div class="col-sm-6">
+      <div data-ng-controller="HomepageBoxScoresCtrl" class="stats-news-list stats-box-scores" data-ng-cloak>
+
+  <div class="stats-table-title">
+    Box Scores
+  </div>
+    
+  <form ng-submit="submit()">
+    <div class="col-sm-3 text">
+      Find any box score<br> (1946 - present)
+    </div>     
+    <div class="col-sm-9 dates">
+      <select id="box-score-month" class="fa icon-caret-down" type="select" ng-model="month">
+        <option value="1">January</option>
+        <option value="2">February</option>
+        <option value="3">March</option>
+        <option value="4">April</option>
+        <option value="5">May</option>
+        <option value="6">June</option>
+        <option value="7">July</option>
+        <option value="8">August</option>
+        <option value="9">September</option>
+        <option value="10">October</option>
+        <option value="11">November</option>
+        <option value="12">December</option>
+      </select>
+      <select id="box-score-day" class="fa icon-caret-down" type="select" ng-model="day">
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+        <option value="8">8</option>
+        <option value="9">9</option>
+        <option value="10">10</option>
+        <option value="11">11</option>
+        <option value="12">12</option>
+        <option value="13">13</option>
+        <option value="14">14</option>
+        <option value="15">15</option>
+        <option value="16">16</option>
+        <option value="17">17</option>
+        <option value="18">18</option>
+        <option value="19">19</option>
+        <option value="20">20</option>
+        <option value="21">21</option>
+        <option value="22">22</option>
+        <option value="23">23</option>
+        <option value="24">24</option>
+        <option value="25">25</option>
+        <option value="26">26</option>
+        <option value="27">27</option>
+        <option value="28">28</option>
+        <option value="29">29</option>
+        <option value="30">30</option>
+        <option value="31">31</option>
+      </select>
+      <select id="box-score-year" class="fa icon-caret-down" type="select" ng-model="year">
+        <option value="2016">2016</option>
+        <option value="2015">2015</option>
+        <option value="2014">2014</option>
+        <option value="2013">2013</option>
+        <option value="2012">2012</option>
+        <option value="2011">2011</option>
+        <option value="2010">2010</option>
+        <option value="2009">2009</option>
+        <option value="2008">2008</option>
+        <option value="2007">2007</option>
+        <option value="2006">2006</option>
+        <option value="2005">2005</option>
+        <option value="2004">2004</option>
+        <option value="2003">2003</option>
+        <option value="2002">2002</option>
+        <option value="2001">2001</option>
+        <option value="2000">2000</option>
+        <option value="1999">1999</option>
+        <option value="1998">1998</option>
+        <option value="1997">1997</option>
+        <option value="1996">1996</option>
+        <option value="1995">1995</option>
+        <option value="1994">1994</option>
+        <option value="1993">1993</option>
+        <option value="1992">1992</option>
+        <option value="1991">1991</option>
+        <option value="1990">1990</option>
+        <option value="1989">1989</option>
+        <option value="1988">1988</option>
+        <option value="1987">1987</option>
+        <option value="1986">1986</option>
+        <option value="1985">1985</option>
+        <option value="1984">1984</option>
+        <option value="1983">1983</option>
+        <option value="1982">1982</option>
+        <option value="1981">1981</option>
+        <option value="1980">1980</option>
+        <option value="1979">1979</option>
+        <option value="1978">1978</option>
+        <option value="1977">1977</option>
+        <option value="1976">1976</option>
+        <option value="1975">1975</option>
+        <option value="1974">1974</option>
+        <option value="1973">1973</option>
+        <option value="1972">1972</option>
+        <option value="1971">1971</option>
+        <option value="1970">1970</option>
+        <option value="1969">1969</option>
+        <option value="1968">1968</option>
+        <option value="1967">1967</option>
+        <option value="1966">1966</option>
+        <option value="1965">1965</option>
+        <option value="1964">1964</option>
+        <option value="1963">1963</option>
+        <option value="1962">1962</option>
+        <option value="1961">1961</option>
+        <option value="1960">1960</option>
+        <option value="1959">1959</option>
+        <option value="1958">1958</option>
+        <option value="1957">1957</option>
+        <option value="1956">1956</option>
+        <option value="1955">1955</option>
+        <option value="1954">1954</option>
+        <option value="1953">1953</option>
+        <option value="1954">1954</option>
+        <option value="1952">1952</option>
+        <option value="1951">1951</option>
+        <option value="1950">1950</option>
+        <option value="1949">1949</option>
+        <option value="1948">1948</option>
+        <option value="1947">1947</option>
+        <option value="1946">1946</option>
+        <option value="1945">1945</option>
+      <input type="submit" value="Go">
+    </select>
+</div>     
+  </form>
+
+
+  <div class="items">
+    <div ng-repeat="(i, article) in data" class="item">
+      <a ng-href="{{article.ListItemLink}}">{{article.ListItemCaption}}</a> - <span>{{ article.ListItemDescription }}</span>
+    </div>
+  </div>
+
+</div> <!-- .stats-news-list -->
+    </div>
+
+  </div>
+
+  <div class="row">
+      <div class="col-sm-6">
+        <div class="col-md-12 col-xs-12 bottom-gold-border"></div>
+     </div>
+
+    <div class="col-sm-6">
+         <div class="col-md-12 col-xs-12 bottom-gold-border"></div>
+    </div>
+  </div>
+
+  <div class="row homepage-boxscore-row  no-bottom-margin">
+
+    <div class="col-sm-6">
+         <div data-ng-controller="HomepageShotChartsCtrl" class="stats-news-list stats-shot-charts" data-ng-cloak>
+
+  <div class="stats-table-title">
+    Shot Charts
+  </div>
+
+  <div ng-repeat="(i, article) in data" class="item">
+
+    <div class="col-sm-4 shot-chart">
+
+      <div class="image">
+        <a href="%7B%7B%20article.ListItemLink%20%7D%7D"><img ng-src="http://stats.nba.com{{article.ListItemImageURL}}" alt=""></a>
+      </div>
+      <div class="text">
+        <p ng-bind-html="trustAsHtml(article.ListItemDescription)"></p>
+        <a href="%7B%7B%20article.ListItemLink%20%7D%7D">View Shotchart</a>
+      </div>
+
+    </div>
+
+  </div>
+
+</div> <!-- .stats-news-list -->
+    </div>
+
+  </div>
+
+  <div class="row">
+    <div class="col-sm-6">
+      <div class="col-md-12 col-xs-12 no-bottom-gold-border"></div>
+    </div>
+    <div class="col-sm-6">
+      <div class="col-md-12 col-xs-12 no-bottom-gold-border"></div>
+    </div>
+  </div>
+
+</div>
+
+        </div>
+
+        <div class="row">
+          <div class="col-sm-12">
+            <div class="row visible-lg" data-ng-if="!IS_MOBILE">
+  <div class="col-sm-12">
+    <div class="footer nbaThird" id="nbaFooter">
+      <script src="http://i.cdn.turner.com/nba/nba/.element/js/global/2.0/nba-footer.js"></script>
+    </div>
+  </div>
+</div>
+
+<div class="row hidden-lg">
+  <div class="col-sm-12">
+    <div class="footer">
+      <small>
+        Copyright 2015 NBA Media Ventures, LLC | NBA Media Ventures, LLC. All rights reserved.<br>
+        No portion of this site may be duplicated, redistributed or manipulated in any form.<br>
+        By accessing any information on this site, you agree to abide by the NBA.com Network Privacy Policy and Terms of Use.
+      </small>
+    </div>
+  </div>
+</div>          </div>
+        </div>
+
+      </div> <!-- .container -->
+    </div> <!-- #app-container -->
+
+      <script src="/scripts/vendor.min.js"></script>
+  <script src="/scripts/custom.min.js"></script>
+    <!-- turners header -->
+<script src="http://i.cdn.turner.com/nba/nba/.element/js/global/2.0/nba-navigation.js"></script>
+
+<!-- turner ad tag includes -->
+<script src="http://i.cdn.turner.com/analytics/nba/ais.js"></script>
+<script src="http://i.cdn.turner.com/ads/nba/adfuel.js"></script>
+<script src="http://i.cdn.turner.com/ads/nba/nba_stats_main.js"></script>
+
+<!-- turner nba ros node tag -->
+<script type="text/javascript" src="http://content.dl-rms.com/rms/mother/18184/nodetag.js"></script>
+
+
+    <!-- GA and page tracking scripts -->
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-50436523-1', 'nba.com');
+  ga('send', 'pageview');
+</script>
+
+<!-- /GA and page tracking scripts -->
+
+<!-- BEGIN: NBA analytics package snippet. -->
+<!-- Should be as close the the closing "body" tag as possible. -->
+<script id="_nbaScoutAnalytics" src="http://z.cdn.turner.com/nba/tmpl_asset/static/nba-cms3-base/latest/js/pkgAnalyticsScout-min.js"></script>
+<script>
+	initOmniture();
+	_nba.analytics.setOverride("disableAutoPage",true);
+
+	if (_nba && _nba.settings && _nba.settings.global) {
+	   _nba.settings.global.experience="responsive";
+	}
+</script>
+<!-- END: NBA analytics package snippet. -->
+
+    
+<div class="esi">
+
+  
+        <!--do nothing-->
+    
+
+
+  
+
+
+  
+
+ <style>
+           @media (min-width: 1200px){
+            .page-header .content-right.sap-header img.no-branding.visible-lg {display: none !important;}
+            .page-header .content-right.sap-header img.sap.visible-lg {display: block !important;}
+           }
+           @media (max-width: 1199px) and (min-width: 992px){
+            .page-header .content-right.sap-header img.no-branding.visible-md {display: none !important;}
+            .page-header .content-right.sap-header img.sap.visible-md {display: block !important;}
+           }
+           @media (max-width: 991px) and (min-width: 768px){
+            .page-header .content-right.sap-header img.no-branding.visible-sm {display: none !important;}
+            .page-header .content-right.sap-header img.sap.visible-sm {display: block !important;}
+           }
+           @media (max-width: 767px){
+            .page-header .content-right.sap-header img.no-branding.visible-xs {display: none !important;}
+            .page-header .content-right.sap-header img.sap.visible-xs {display: block !important;}
+           }
+        </style>
+
+      
+
+        
+
+<!--common click through-->
+
+<!--<a id="sapSponserClickThroughURL" href="http://t.mookie1.com/t/v1/clk?migAgencyId=347&migSource=adsrv2&migTrackDataExt=3143259;106063877;278930987;0&migRandom=[1456642021]&migTrackFmtExt=client;io;ad;crtv&migUnencodedDest=http://ad.doubleclick.net/ddm/clk/287875440;114715162;i;pc=[TPAS_ID]"></a>-->
+
+<a id="sapSponserClickThroughURL" href="http://t.mookie1.com/t/v1/clk?migAgencyId=347&amp;migSource=adsrv2&amp;migTrackDataExt=3143259;106063877;278930987;0&amp;migRandom=%5B1456642021%5D&amp;migTrackFmtExt=client;io;ad;crtv&amp;migUnencodedDest=https://ad.doubleclick.net/ddm/clk/299846798;126620931;b;pc=%5BTPAS_ID%5D"></a>
+
+<a id="sapBeyondClickThroughURL" href="http://t.mookie1.com/t/v1/clk?migAgencyId=347&amp;migSource=adsrv2&amp;migTrackDataExt=3143259;106063875;278930978;0&amp;migRandom=%5B1456642021%0A%20%20%20%20%20%20%20%20%5D&amp;migTrackFmtExt=client;io;ad;crtv&amp;migUnencodedDest=http://ad.doubleclick.net/ddm/clk/287875440;114715162;i;pc=%5BTPAS_ID%5D"></a>
+
+<!--<img style="display:none;" src="http://t.mookie1.com/t/v1/imp?migAgencyId=347&migSource=adsrv2&migTrackDataExt=3143259;106063877;278930987;0&migTrackFmtExt=client;io;ad;crtv&migUnencodedDest=http://ad.doubleclick.net/ad/N69702.149455NBAMEDIAVENTURESLLC/B8466269.114715162;sz=1x1;pc=[TPAS_ID];ord=[1456642021]?" width="1" height="1">-->
+
+<img style="display:none;" src="http://t.mookie1.com/t/v1/imp?migAgencyId=347&amp;migSource=adsrv2&amp;migTrackDataExt=3143259;106063877;278930987;0&amp;migTrackFmtExt=client;io;ad;crtv&amp;migUnencodedDest=https://ad.doubleclick.net/ddm/ad/N69702.149455NBAMEDIAVENTURESLLC/B9310282.126620931;sz=1x1;ord=%5B1456642021%5D;dc_lat=;dc_rdid=;tag_for_child_directed_treatment=?" width="1" height="1">
+
+        
+
+    
+
+</div>
+
+  </body>
+</html>
